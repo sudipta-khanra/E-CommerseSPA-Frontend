@@ -28,7 +28,7 @@ function Cart() {
                         <div key={i.item._id} className="border p-2 flex justify-between">
                             <div>
                                 <h2 className="font-bold">{i.item.name}</h2>
-                                <p>${i.item.price} x {i.quantity}</p>
+                                <p>₹{i.item.price} x {i.quantity}</p>
                             </div>
                             <button onClick={() => removeItem(i.item._id)} className="bg-red-500 text-white p-1">Remove</button>
                         </div>

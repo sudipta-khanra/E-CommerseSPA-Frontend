@@ -202,7 +202,7 @@ function Items() {
                 <h2 className="font-bold text-lg mb-1">{item.name}</h2>
                 <p className="text-gray-500 mb-1">{item.category}</p>
                 <p className="text-blue-600 font-semibold mb-1">
-                  ${item.price}
+                  ₹{item.price}
                 </p>
                 <p className="text-gray-700 mb-3">{item.description}</p>
                 <div className="flex gap-2">
