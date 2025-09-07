@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import api from "../api"; // axios instance with token
+import api from "../api";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 function Items() {
   const [items, setItems] = useState([]);
-  const [error, setError] = useState(""); // store error messages
+  const [error, setError] = useState("");
   const [category, setCategory] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -13,10 +15,14 @@ function Items() {
     price: "",
     description: "",
   });
+
   const [editingItem, setEditingItem] = useState(null);
   const [userLoggedIn, setUserLoggedIn] = useState(false);
 
-  // Check login by trying to fetch items
+  const { cart, addToCart } = useCart(); // use global cart context
+  const navigate = useNavigate();
+
+  // Fetch Items
   const fetchItems = async () => {
     try {
       const params = {};
@@ -27,7 +33,7 @@ function Items() {
       const res = await api.get("/items", { params });
       setItems(res.data);
       setError("");
-      setUserLoggedIn(true); // ✅ user is logged in
+      setUserLoggedIn(true);
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Please log in to view products");
@@ -39,6 +45,7 @@ function Items() {
     }
   };
 
+  // On mount
   useEffect(() => {
     fetchItems();
   }, []);
@@ -75,17 +82,6 @@ function Items() {
       fetchItems();
     } catch (err) {
       console.error(err.response?.data || err.message);
-    }
-  };
-
-  // Add to Cart
-  const handleAddToCart = async (itemId) => {
-    try {
-      const res = await api.post("/cart/add", { itemId });
-      console.log("Cart updated:", res.data);
-      alert("Item added to cart!");
-    } catch (err) {
-      console.error("Error adding to cart:", err.response?.data || err.message);
     }
   };
 
@@ -127,7 +123,7 @@ function Items() {
             </button>
           </div>
 
-          {/* Add Item (only for logged-in user) */}
+          {/* Add Item */}
           {userLoggedIn && (
             <div className="max-w-4xl mx-auto mb-10 p-6 bg-white rounded-xl shadow-xl border border-gray-200">
               <h2 className="text-2xl font-bold mb-5 text-gray-800">Add New Product</h2>
@@ -175,35 +171,26 @@ function Items() {
                 className="bg-white rounded-2xl shadow-lg p-6 transform hover:-translate-y-2 hover:shadow-2xl transition duration-300 relative"
               >
                 {editingItem && editingItem._id === item._id ? (
-                  // Edit Mode
                   <div className="flex flex-col gap-3">
                     <input
                       value={editingItem.name}
-                      onChange={(e) =>
-                        setEditingItem({ ...editingItem, name: e.target.value })
-                      }
+                      onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
                       className="p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
                     />
                     <input
                       value={editingItem.category}
-                      onChange={(e) =>
-                        setEditingItem({ ...editingItem, category: e.target.value })
-                      }
+                      onChange={(e) => setEditingItem({ ...editingItem, category: e.target.value })}
                       className="p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
                     />
                     <input
                       type="number"
                       value={editingItem.price}
-                      onChange={(e) =>
-                        setEditingItem({ ...editingItem, price: e.target.value })
-                      }
+                      onChange={(e) => setEditingItem({ ...editingItem, price: e.target.value })}
                       className="p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
                     />
                     <input
                       value={editingItem.description}
-                      onChange={(e) =>
-                        setEditingItem({ ...editingItem, description: e.target.value })
-                      }
+                      onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
                       className="p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
                     />
                     <div className="flex gap-3 mt-3">
@@ -222,7 +209,6 @@ function Items() {
                     </div>
                   </div>
                 ) : (
-                  // Display Mode
                   <>
                     <h2 className="text-xl font-bold text-gray-800 mb-1">{item.name}</h2>
                     <p className="text-gray-500 mb-2">{item.category}</p>
@@ -231,27 +217,37 @@ function Items() {
                     </p>
                     <p className="text-gray-700 mb-4">{item.description}</p>
 
-                    {/* Only show buttons if user is logged in */}
                     {userLoggedIn && (
                       <div className="flex gap-3 flex-wrap">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition font-semibold"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item._id)}
-                          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-semibold"
-                        >
-                          Delete
-                        </button>
-                        <button
-                          onClick={() => handleAddToCart(item._id)}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
-                        >
-                          Add to Cart
-                        </button>
+                        {cart.some(c => c.item._id === item._id) ? (
+                          <button
+                            onClick={() => navigate("/cart")}
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold"
+                          >
+                            Go to Cart
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleEdit(item)}
+                              className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition font-semibold"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item._id)}
+                              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-semibold"
+                            >
+                              Delete
+                            </button>
+                            <button
+                              onClick={() => addToCart(item._id)}
+                              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
+                            >
+                              Add to Cart
+                            </button>
+                          </>
+                        )}
                       </div>
                     )}
                   </>

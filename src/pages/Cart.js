@@ -1,34 +1,7 @@
-import { useState, useEffect } from "react";
-import api from "../api";
+import { useCart } from "../context/CartContext";
 
 function Cart() {
-  const [cart, setCart] = useState([]);
-
-  const fetchCart = async () => {
-    try {
-      const res = await api.get("/cart");
-      // Filter out items where item is null
-      const validItems = res.data.items?.filter(i => i?.item) || [];
-      setCart(validItems);
-    } catch (err) {
-      console.error("Error fetching cart:", err.response?.data || err.message);
-      setCart([]);
-    }
-  };
-
-  useEffect(() => {
-    fetchCart();
-  }, []);
-
-  const removeItem = async (id) => {
-    try {
-      const res = await api.post("/cart/remove", { itemId: id });
-      const validItems = res.data.items?.filter(i => i?.item) || [];
-      setCart(validItems);
-    } catch (err) {
-      console.error("Error removing item:", err.response?.data || err.message);
-    }
-  };
+  const { cart, removeFromCart } = useCart();
 
   return (
     <div className="p-6 min-h-screen bg-gray-50">
@@ -50,7 +23,7 @@ function Cart() {
                 </p>
               </div>
               <button
-                onClick={() => removeItem(item._id)}
+                onClick={() => removeFromCart(item._id)}
                 className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
               >
                 Remove
