@@ -1,42 +1,66 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import api from "../api";
 
 function Cart() {
-    const [cart, setCart] = useState({ items: [] });
-    const token = localStorage.getItem('token');
+  const [cart, setCart] = useState([]);
 
-    const fetchCart = async () => {
-        const res = await axios.get('http://localhost:5000/api/cart', { headers: { 'x-auth-token': token } });
-        setCart(res.data);
-    };
+  const fetchCart = async () => {
+    try {
+      const res = await api.get("/cart");
+      // Filter out items where item is null
+      const validItems = res.data.items?.filter(i => i?.item) || [];
+      setCart(validItems);
+    } catch (err) {
+      console.error("Error fetching cart:", err.response?.data || err.message);
+      setCart([]);
+    }
+  };
 
-    const removeItem = async (itemId) => {
-        await axios.post('http://localhost:5000/api/cart/remove', { itemId }, { headers: { 'x-auth-token': token } });
-        fetchCart();
-    };
+  useEffect(() => {
+    fetchCart();
+  }, []);
 
-    useEffect(() => {
-        if (token) fetchCart();
-    }, [token]);
+  const removeItem = async (id) => {
+    try {
+      const res = await api.post("/cart/remove", { itemId: id });
+      const validItems = res.data.items?.filter(i => i?.item) || [];
+      setCart(validItems);
+    } catch (err) {
+      console.error("Error removing item:", err.response?.data || err.message);
+    }
+  };
 
-    return (
-        <div className="p-4">
-            <h1 className="text-2xl mb-4">Cart</h1>
-            {cart.items.length === 0 ? <p>Cart is empty</p> :
-                <div className="space-y-2">
-                    {cart.items.map(i => (
-                        <div key={i.item._id} className="border p-2 flex justify-between">
-                            <div>
-                                <h2 className="font-bold">{i.item.name}</h2>
-                                <p>₹{i.item.price} x {i.quantity}</p>
-                            </div>
-                            <button onClick={() => removeItem(i.item._id)} className="bg-red-500 text-white p-1">Remove</button>
-                        </div>
-                    ))}
-                </div>
-            }
+  return (
+    <div className="p-6 min-h-screen bg-gray-50">
+      <h1 className="text-3xl font-bold mb-6">🛒 Your Cart</h1>
+
+      {cart.length === 0 ? (
+        <p className="text-gray-600 text-lg">Your cart is empty</p>
+      ) : (
+        <div className="space-y-4">
+          {cart.map(({ item }) => (
+            <div
+              key={item._id}
+              className="flex justify-between items-center bg-white p-4 rounded-lg shadow-md"
+            >
+              <div>
+                <h2 className="font-semibold text-lg">{item.name}</h2>
+                <p className="text-gray-600">
+                  ₹{item.price?.toLocaleString("en-IN")}
+                </p>
+              </div>
+              <button
+                onClick={() => removeItem(item._id)}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
         </div>
-    );
+      )}
+    </div>
+  );
 }
 
 export default Cart;
