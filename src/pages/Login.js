@@ -26,34 +26,14 @@ function Login() {
       return;
     }
 
-    // try {
-    //   const res = await axios.post("http://localhost:5000/api/auth/login", {
-    //     email,
-    //     password,
-    //   });
-
-    //   // Store token and username
-    //   localStorage.setItem("token", res.data.token);
-    //   localStorage.setItem("userName", res.data.name);
-
-    //   // Trigger custom event for Navbar to update
-    //   window.dispatchEvent(new Event("login"));
-
-    //   navigate("/");
-    // } catch (err) {
-    //   setError("Invalid email or password");
-    //   setShake(true);
-    //   setTimeout(() => setShake(false), 500);
-    // }
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/auth/login`,
+        { email, password }
+      );
 
-      // Store token and username
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userName", res.data.user.name); // <-- use res.data.user.name
+      localStorage.setItem("userName", res.data.user.name);
       window.dispatchEvent(new Event("login"));
 
       navigate("/");
