@@ -98,7 +98,7 @@ function Navbar() {
               </Link>
               <Link
                 to="/signup"
-                className="px-4 py-2 text-gray-700 rounded-md font-medium border border-gray-300 hover:bg-gray-100 transition duration-200"
+                className="px-4 py-2 text-gray-700  transition duration-200"
                 onClick={() => setIsOpen(false)}
               >
                 Signup
