@@ -30,6 +30,16 @@ function Cart() {
               </button>
             </div>
           ))}
+          {/* Optional: Display total price */}
+          <div className="mt-6 p-4 bg-white rounded-lg shadow-md flex justify-between font-bold text-lg">
+            <span>Total:</span>
+            <span>
+              ₹
+              {cart
+                .reduce((total, { item }) => total + (item.price || 0), 0)
+                .toLocaleString("en-IN")}
+            </span>
+          </div>
         </div>
       )}
     </div>

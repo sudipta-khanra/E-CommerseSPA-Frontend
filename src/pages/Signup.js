@@ -1,21 +1,21 @@
 import { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../api"; // axios instance with baseURL
 
 function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setFieldErrors({});
     setError("");
+    setFieldErrors({});
 
     const errors = {};
     if (!name) errors.name = "Name is required";
@@ -30,15 +30,11 @@ function Signup() {
     }
 
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/auth/signup`, {
-        name,
-        email,
-        password,
-      });
-
+      // ✅ Corrected URL
+      await api.post("/api/auth/signup", { name, email, password });
       navigate("/login");
     } catch (err) {
-      setError("Signup failed. Email may already be in use.");
+      setError(err.response?.data?.msg || "Signup failed");
       setShake(true);
       setTimeout(() => setShake(false), 500);
     }
@@ -111,25 +107,25 @@ function Signup() {
 
         <p className="mt-4 text-center text-gray-500 text-sm">
           Already have an account?{" "}
-          <a
-            href="/login"
+          <Link
+            to="/login"
             className="text-blue-600 font-medium hover:underline"
           >
             Login
-          </a>
+          </Link>
         </p>
       </div>
 
       <style>
         {`
           @keyframes shake {
-              0%, 100% { transform: translateX(0); }
-              25% { transform: translateX(-5px); }
-              50% { transform: translateX(5px); }
-              75% { transform: translateX(-5px); }
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
           }
           .animate-shake {
-              animation: shake 0.5s ease;
+            animation: shake 0.5s ease;
           }
         `}
       </style>

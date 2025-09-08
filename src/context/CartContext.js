@@ -1,78 +1,47 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import api from "../api";
-import { AuthContext } from "./AuthContext";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const { isLoggedIn } = useContext(AuthContext);
   const [cart, setCart] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
+  // Fetch cart from backend
   const fetchCart = async () => {
-    if (!isLoggedIn) {
-      setCart([]);
-      setError("Please log in to view products");
-      setLoading(false);
-      return;
-    }
-
     try {
-      setLoading(true);
-      const res = await api.get("/cart");
-      const validItems = res.data.items?.filter(i => i?.item) || [];
-      setCart(validItems);
-      setError(null);
+      const res = await api.get("/api/cart");
+      setCart(res.data.items || []);
     } catch (err) {
-      console.error("Error fetching cart:", err.response?.data || err.message);
-      setError(err.response?.data?.msg || "Failed to fetch cart");
-      setCart([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addToCart = async (itemId) => {
-    if (!isLoggedIn) {
-      setError("Please log in to add items");
-      return;
-    }
-
-    try {
-      const res = await api.post("/cart/add", { itemId });
-      const validItems = res.data.items?.filter(i => i?.item) || [];
-      setCart(validItems);
-      setError(null);
-    } catch (err) {
-      console.error("Error adding item:", err.response?.data || err.message);
-      setError(err.response?.data?.msg || "Failed to add item");
-    }
-  };
-
-  const removeFromCart = async (itemId) => {
-    if (!isLoggedIn) {
-      setError("Please log in to remove items");
-      return;
-    }
-
-    try {
-      const res = await api.post("/cart/remove", { itemId });
-      const validItems = res.data.items?.filter(i => i?.item) || [];
-      setCart(validItems);
-      setError(null);
-    } catch (err) {
-      console.error("Error removing item:", err.response?.data || err.message);
-      setError(err.response?.data?.msg || "Failed to remove item");
+      console.error(err.response?.data || err.message);
     }
   };
 
   useEffect(() => {
     fetchCart();
-  }, [isLoggedIn]);
+  }, []);
+
+  const addToCart = async (itemId) => {
+    try {
+      const res = await api.post("/api/cart/add", { itemId });
+      setCart(res.data.items || []);
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+    }
+  };
+
+  const removeFromCart = async (itemId) => {
+    try {
+      const res = await api.post("/api/cart/remove", { itemId });
+      setCart(res.data.items || []);
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+    }
+  };
 
   return (
-    <CartContext.Provider value={{ cart, fetchCart, addToCart, removeFromCart, loading, error }}>
+    <CartContext.Provider
+      value={{ cart, setCart, addToCart, removeFromCart, fetchCart }}
+    >
       {children}
     </CartContext.Provider>
   );

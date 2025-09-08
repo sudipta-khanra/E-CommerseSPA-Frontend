@@ -15,66 +15,67 @@ function Items() {
     price: "",
     description: "",
   });
-
   const [editingItem, setEditingItem] = useState(null);
   const [userLoggedIn, setUserLoggedIn] = useState(false);
 
   const { cart, addToCart } = useCart();
   const navigate = useNavigate();
 
-  // const fetchItems = async () => {
-  //   try {
-  //     const params = {};
-  //     if (category) params.category = category;
-  //     if (minPrice) params.minPrice = minPrice;
-  //     if (maxPrice) params.maxPrice = maxPrice;
+  // Fetch items from API
+  const fetchItems = async () => {
+    try {
+      const params = {};
+      if (category.trim() !== "") params.category = category;
+      if (minPrice !== "") params.minPrice = minPrice;
+      if (maxPrice !== "") params.maxPrice = maxPrice;
 
-  //     const res = await api.get("/items", { params });
-  //     setItems(res.data);
-  //     setError("");
-  //     setUserLoggedIn(true);
-  //   } catch (err) {
-  //     if (err.response?.status === 401) {
-  //       setError("Please log in to view products");
-  //       setUserLoggedIn(false);
-  //       setItems([]);
-  //     } else {
-  //       setError(err.response?.data?.message || err.message);
-  //     }
-  //   }
-  // };
-const fetchItems = async () => {
-  try {
-    const params = {};
-    if (category) params.category = category;
-    if (minPrice) params.minPrice = minPrice;
-    if (maxPrice) params.maxPrice = maxPrice;
+      const res = await api.get("/api/items", { params });
 
-    const res = await api.get("/items", { params });
+      setItems(Array.isArray(res.data) ? res.data : []);
+      setError("");
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError("Please log in to view products");
+        setUserLoggedIn(false);
+        setItems([]);
+      } else {
+        setError(err.response?.data?.message || err.message);
+        setItems([]);
+      }
+    }
+  };
 
-    // Ensure items is always an array
-    setItems(Array.isArray(res.data) ? res.data : []);
-    setError("");
-    setUserLoggedIn(true);
-  } catch (err) {
-    if (err.response?.status === 401) {
+  // Check if user is logged in on mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setUserLoggedIn(true);
+    } else {
       setError("Please log in to view products");
       setUserLoggedIn(false);
-      setItems([]);
-    } else {
-      setError(err.response?.data?.message || err.message);
-      setItems([]);
     }
-  }
-};
+  }, []);
 
+  // Fetch items when user logs in
   useEffect(() => {
-    fetchItems();
+    if (userLoggedIn) fetchItems();
+  }, [userLoggedIn]);
+
+  // Listen for login events
+  useEffect(() => {
+    const handleLogin = () => {
+      setUserLoggedIn(true);
+    };
+    window.addEventListener("login", handleLogin);
+    return () => window.removeEventListener("login", handleLogin);
   }, []);
 
   const handleAddItem = async () => {
     try {
-      await api.post("/items", { ...newItem, price: Number(newItem.price) });
+      await api.post("/api/items", {
+        ...newItem,
+        price: Number(newItem.price),
+      });
       setNewItem({ name: "", category: "", price: "", description: "" });
       fetchItems();
     } catch (err) {
@@ -84,25 +85,48 @@ const fetchItems = async () => {
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/items/${id}`);
+      await api.delete(`/api/items/${id}`);
       fetchItems();
     } catch (err) {
       console.error(err.response?.data || err.message);
     }
   };
 
-  const handleUpdate = async () => {
-    try {
-      await api.put(`/items/${editingItem._id}`, {
-        ...editingItem,
-        price: Number(editingItem.price),
-      });
-      setEditingItem(null);
-      fetchItems();
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-    }
-  };
+  // const handleUpdate = async () => {
+  //   try {
+  //     await api.put(`/api/items/${editingItem._id}`, {
+  //       ...editingItem,
+  //       price: Number(editingItem.price),
+  //     });
+  //     setEditingItem(null);
+  //     fetchItems();
+  //   } catch (err) {
+  //     console.error(err.response?.data || err.message);
+  //   }
+  // };
+const handleUpdate = async () => {
+  try {
+    const res = await api.put(`/api/items/${editingItem._id}`, {
+      ...editingItem,
+      price: Number(editingItem.price),
+    });
+
+    setEditingItem(null);
+
+    // Update items list
+    setItems(prev => prev.map(it => (it._id === res.data._id ? res.data : it)));
+
+    // UPDATE CART ITEMS IMMEDIATELY
+    setCart(prev =>
+      prev.map(c =>
+        c.item._id === res.data._id ? { ...c, item: res.data } : c
+      )
+    );
+
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+  }
+};
 
   const handleEdit = (item) => setEditingItem(item);
 
@@ -112,6 +136,7 @@ const fetchItems = async () => {
         <p className="text-red-600 text-xl text-center mt-20">{error}</p>
       ) : (
         <>
+          {/* Filters */}
           <div className="flex flex-wrap gap-4 justify-center mb-8">
             <input
               placeholder="Category"
@@ -141,6 +166,7 @@ const fetchItems = async () => {
             </button>
           </div>
 
+          {/* Add Product */}
           {userLoggedIn && (
             <div className="max-w-4xl mx-auto mb-10 p-6 bg-white rounded-xl shadow-xl border border-gray-200">
               <h2 className="text-2xl font-bold mb-5 text-gray-800">
@@ -190,6 +216,7 @@ const fetchItems = async () => {
             </div>
           )}
 
+          {/* Items Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {items.map((item) => (
               <div
