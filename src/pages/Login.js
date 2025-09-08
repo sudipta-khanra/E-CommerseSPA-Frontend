@@ -1,10 +1,8 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
 
 function Login() {
-  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -15,7 +13,9 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate fields
+    setError("");
+    setFieldErrors({});
+
     const errors = {};
     if (!email) errors.email = "Email is required";
     if (!password) errors.password = "Password is required";
@@ -27,13 +27,14 @@ function Login() {
     }
 
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/auth/login`,
+        { email, password }
+      );
 
-      // ✅ Use context instead of just localStorage
-      login(res.data.token, res.data.user.name);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userName", res.data.user.name);
+      window.dispatchEvent(new Event("login"));
 
       navigate("/");
     } catch (err) {
