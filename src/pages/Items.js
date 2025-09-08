@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
@@ -22,51 +23,27 @@ function Items() {
   const { cart, addToCart } = useCart();
   const navigate = useNavigate();
 
-  // const fetchItems = async () => {
-  //   try {
-  //     const params = {};
-  //     if (category) params.category = category;
-  //     if (minPrice) params.minPrice = minPrice;
-  //     if (maxPrice) params.maxPrice = maxPrice;
+  const fetchItems = async () => {
+    try {
+      const params = {};
+      if (category) params.category = category;
+      if (minPrice) params.minPrice = minPrice;
+      if (maxPrice) params.maxPrice = maxPrice;
 
-  //     const res = await api.get("/items", { params });
-  //     setItems(res.data);
-  //     setError("");
-  //     setUserLoggedIn(true);
-  //   } catch (err) {
-  //     if (err.response?.status === 401) {
-  //       setError("Please log in to view products");
-  //       setUserLoggedIn(false);
-  //       setItems([]);
-  //     } else {
-  //       setError(err.response?.data?.message || err.message);
-  //     }
-  //   }
-  // };
-const fetchItems = async () => {
-  try {
-    const params = {};
-    if (category) params.category = category;
-    if (minPrice) params.minPrice = minPrice;
-    if (maxPrice) params.maxPrice = maxPrice;
-
-    const res = await api.get("/items", { params });
-
-    // Ensure items is always an array
-    setItems(Array.isArray(res.data) ? res.data : []);
-    setError("");
-    setUserLoggedIn(true);
-  } catch (err) {
-    if (err.response?.status === 401) {
-      setError("Please log in to view products");
-      setUserLoggedIn(false);
-      setItems([]);
-    } else {
-      setError(err.response?.data?.message || err.message);
-      setItems([]);
+      const res = await api.get("/items", { params });
+      setItems(res.data);
+      setError("");
+      setUserLoggedIn(true);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError("Please log in to view products");
+        setUserLoggedIn(false);
+        setItems([]);
+      } else {
+        setError(err.response?.data?.message || err.message);
+      }
     }
-  }
-};
+  };
 
   useEffect(() => {
     fetchItems();
@@ -307,3 +284,5 @@ const fetchItems = async () => {
 }
 
 export default Items;
+
+
