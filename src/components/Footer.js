@@ -38,14 +38,14 @@ function Footer() {
 
         <div>
           <h2 className="text-xl font-bold mb-2">Contact Us</h2>
-          <p className="text-sm sm:text-base">Email: support@ShopMate.com</p>
+          <p className="text-sm sm:text-base">Email: support@shopMate.com</p>
           <p className="text-sm sm:text-base">Phone: +91 123 456 7890</p>
           <p className="text-sm sm:text-base">Address: Mumbai, India</p>
         </div>
       </div>
 
       <div className="mt-8 text-center text-gray-300 text-xs sm:text-sm">
-        &copy; {new Date().getFullYear()} E-Commerce. All rights reserved.
+        &copy; {new Date().getFullYear()} ShopMate. All rights reserved.
       </div>
     </footer>
   );
