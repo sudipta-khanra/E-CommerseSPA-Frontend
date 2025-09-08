@@ -10,39 +10,43 @@ function Login() {
   const [fieldErrors, setFieldErrors] = useState({});
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    setError("");
-    setFieldErrors({});
+  // Validate fields
+  const errors = {};
+  if (!email) errors.email = "Email is required";
+  if (!password) errors.password = "Password is required";
+  if (Object.keys(errors).length > 0) {
+    setFieldErrors(errors);
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+    return;
+  }
 
-    const errors = {};
-    if (!email) errors.email = "Email is required";
-    if (!password) errors.password = "Password is required";
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      return;
-    }
+  try {
+    // Send login request
+    const res = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, {
+      email,
+      password,
+    });
 
-    try {
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/auth/login`,
-        { email, password }
-      );
+    // Save token & username
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("userName", res.data.user.name);
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userName", res.data.user.name);
-      window.dispatchEvent(new Event("login"));
+    // Notify the app about login
+    window.dispatchEvent(new Event("login"));
 
-      navigate("/");
-    } catch (err) {
-      setError("Invalid email or password");
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-    }
-  };
+    // Navigate to home
+    navigate("/");
+  } catch (err) {
+    setError("Invalid email or password");
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
