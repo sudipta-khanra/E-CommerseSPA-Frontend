@@ -21,7 +21,6 @@ function Items() {
   const { cart, addToCart } = useCart();
   const navigate = useNavigate();
 
-  // Fetch items from API
   const fetchItems = async () => {
     try {
       const params = {};
@@ -45,7 +44,6 @@ function Items() {
     }
   };
 
-  // Check if user is logged in on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -56,12 +54,10 @@ function Items() {
     }
   }, []);
 
-  // Fetch items when user logs in
   useEffect(() => {
     if (userLoggedIn) fetchItems();
   }, [userLoggedIn]);
 
-  // Listen for login events
   useEffect(() => {
     const handleLogin = () => {
       setUserLoggedIn(true);
@@ -92,18 +88,7 @@ function Items() {
     }
   };
 
-  // const handleUpdate = async () => {
-  //   try {
-  //     await api.put(`/api/items/${editingItem._id}`, {
-  //       ...editingItem,
-  //       price: Number(editingItem.price),
-  //     });
-  //     setEditingItem(null);
-  //     fetchItems();
-  //   } catch (err) {
-  //     console.error(err.response?.data || err.message);
-  //   }
-  // };
+
 const handleUpdate = async () => {
   try {
     const res = await api.put(`/api/items/${editingItem._id}`, {
@@ -113,10 +98,8 @@ const handleUpdate = async () => {
 
     setEditingItem(null);
 
-    // Update items list
     setItems(prev => prev.map(it => (it._id === res.data._id ? res.data : it)));
 
-    // UPDATE CART ITEMS IMMEDIATELY
     setCart(prev =>
       prev.map(c =>
         c.item._id === res.data._id ? { ...c, item: res.data } : c
@@ -136,7 +119,6 @@ const handleUpdate = async () => {
         <p className="text-red-600 text-xl text-center mt-20">{error}</p>
       ) : (
         <>
-          {/* Filters */}
           <div className="flex flex-wrap gap-4 justify-center mb-8">
             <input
               placeholder="Category"
@@ -166,7 +148,6 @@ const handleUpdate = async () => {
             </button>
           </div>
 
-          {/* Add Product */}
           {userLoggedIn && (
             <div className="max-w-4xl mx-auto mb-10 p-6 bg-white rounded-xl shadow-xl border border-gray-200">
               <h2 className="text-2xl font-bold mb-5 text-gray-800">
@@ -216,7 +197,6 @@ const handleUpdate = async () => {
             </div>
           )}
 
-          {/* Items Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {items.map((item) => (
               <div

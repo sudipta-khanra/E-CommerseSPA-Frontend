@@ -1,4 +1,3 @@
-// Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -26,14 +25,11 @@ function Login() {
         return;
       }
 
-      // ✅ Save token & user info in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("userName", data.user.name);
 
-      // ✅ Notify Navbar to update
       window.dispatchEvent(new Event("login"));
 
-      // ✅ Redirect user
       navigate("/");
     } catch (err) {
       setError("Something went wrong. Please try again.");

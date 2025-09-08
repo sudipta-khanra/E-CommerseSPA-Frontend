@@ -30,7 +30,6 @@ function Cart() {
               </button>
             </div>
           ))}
-          {/* Optional: Display total price */}
           <div className="mt-6 p-4 bg-white rounded-lg shadow-md flex justify-between font-bold text-lg">
             <span>Total:</span>
             <span>

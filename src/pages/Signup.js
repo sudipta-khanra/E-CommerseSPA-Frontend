@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import api from "../api"; // axios instance with baseURL
+import api from "../api"; 
 
 function Signup() {
   const [name, setName] = useState("");
@@ -30,7 +30,6 @@ function Signup() {
     }
 
     try {
-      // ✅ Corrected URL
       await api.post("/api/auth/signup", { name, email, password });
       navigate("/login");
     } catch (err) {

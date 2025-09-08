@@ -38,7 +38,7 @@ function Footer() {
 
         <div>
           <h2 className="text-xl font-bold mb-2">Contact Us</h2>
-          <p className="text-sm sm:text-base">Email: support@ecommerce.com</p>
+          <p className="text-sm sm:text-base">Email: support@ShopMate.com</p>
           <p className="text-sm sm:text-base">Phone: +91 123 456 7890</p>
           <p className="text-sm sm:text-base">Address: Mumbai, India</p>
         </div>

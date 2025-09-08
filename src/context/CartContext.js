@@ -6,7 +6,6 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
 
-  // Fetch cart from backend
   const fetchCart = async () => {
     try {
       const res = await api.get("/api/cart");

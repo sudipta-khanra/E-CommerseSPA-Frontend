@@ -30,7 +30,6 @@ function Navbar() {
           <Link to="/">ShopMate</Link>
         </div>
 
-        {/* Hamburger Button */}
         <div className="md:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
