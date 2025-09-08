@@ -64,7 +64,7 @@ function Navbar() {
 
         {/* Menu Links */}
         <div
-          className={`flex flex-col md:flex-row md:items-center md:static absolute top-full left-0 w-full md:w-auto bg-transparent transition-all duration-300 overflow-hidden ${
+          className={`flex flex-col md:flex-row md:items-center md:static absolute top-full left-0 w-full md:w-auto transition-all duration-300 overflow-hidden ${
             isOpen ? "max-h-96 py-4" : "max-h-0 md:max-h-full"
           }`}
         >
