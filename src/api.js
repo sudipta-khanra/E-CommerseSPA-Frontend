@@ -8,7 +8,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`; // Standard JWT header
+    config.headers["x-auth-token"] = token; // ✅ backend expects x-auth-token
   }
   return config;
 });
