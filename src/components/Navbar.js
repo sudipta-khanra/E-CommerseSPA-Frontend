@@ -77,7 +77,7 @@ function Navbar() {
           {userName ? (
             <>
               <span className="px-4 py-2 text-gray-700 font-medium">
-                Hi, {userName}
+                Hi, {userName?.split(" ")[0] || "User"}
               </span>
               <button
                 onClick={handleLogout}
