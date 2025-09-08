@@ -1,18 +1,19 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import api from "../api";
+import { AuthContext } from "./AuthContext";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
+  const { isLoggedIn } = useContext(AuthContext); // ✅ Get login state
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchCart = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("Please log in to view products");
+    if (!isLoggedIn) { // ✅ Skip if not logged in
       setCart([]);
+      setError("Please log in to view products");
       setLoading(false);
       return;
     }
@@ -33,8 +34,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = async (itemId) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!isLoggedIn) {
       setError("Please log in to add items");
       return;
     }
@@ -51,8 +51,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = async (itemId) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!isLoggedIn) {
       setError("Please log in to remove items");
       return;
     }
@@ -70,7 +69,7 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, [isLoggedIn]); // ✅ Refetch cart when login state changes
 
   return (
     <CartContext.Provider value={{ cart, fetchCart, addToCart, removeFromCart, loading, error }}>

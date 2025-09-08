@@ -5,7 +5,7 @@ import { useCart } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 
 function Items() {
-  const { cart, addToCart, removeFromCart } = useCart();
+  const { cart, addToCart } = useCart();
   const { userName } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -31,28 +31,25 @@ function Items() {
 
   // Fetch items
   const fetchItems = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("Please log in to view products");
-      setItems([]);
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
-
       const params = {};
       if (category) params.category = category;
       if (minPrice) params.minPrice = minPrice;
       if (maxPrice) params.maxPrice = maxPrice;
 
       const res = await api.get("/items", { params });
-      setItems(Array.isArray(res.data.items) ? res.data.items : []);
+
+      // ✅ FIX: use res.data directly (backend returns array)
+      setItems(Array.isArray(res.data) ? res.data : []);
       setError("");
     } catch (err) {
       console.error("Error fetching items:", err.response?.data || err.message);
-      setError(err.response?.data?.msg || "Failed to fetch items");
+      if (err.response?.status === 401) {
+        setError("Please log in to view products");
+      } else {
+        setError(err.response?.data?.message || "Failed to fetch items");
+      }
       setItems([]);
     } finally {
       setLoading(false);
