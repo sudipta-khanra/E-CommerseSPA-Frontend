@@ -15,45 +15,59 @@ function Items() {
     price: "",
     description: "",
   });
-
   const [editingItem, setEditingItem] = useState(null);
-  const [userLoggedIn, setUserLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const { cart, addToCart } = useCart();
   const navigate = useNavigate();
 
-  // ✅ Fetch items
+  // ✅ Fetch items with token check
   const fetchItems = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Please log in to view products");
+      setItems([]);
+      setLoading(false);
+      return;
+    }
+
     try {
+      setLoading(true);
       const params = {};
       if (category) params.category = category;
       if (minPrice) params.minPrice = minPrice;
       if (maxPrice) params.maxPrice = maxPrice;
 
       const res = await api.get("/items", { params });
-      console.log("Fetched items:", res.data);
-
       setItems(Array.isArray(res.data.items) ? res.data.items : []);
       setError("");
-      setUserLoggedIn(true);
     } catch (err) {
+      console.error("Error fetching items:", err.response?.data || err.message);
       if (err.response?.status === 401) {
         setError("Please log in to view products");
-        setUserLoggedIn(false);
+        localStorage.removeItem("token"); // Optional: clear invalid token
         setItems([]);
       } else {
         setError(err.response?.data?.message || err.message);
         setItems([]);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchItems();
-  }, []);
+  }, [category, minPrice, maxPrice]);
 
   // ✅ Add item
   const handleAddItem = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Please log in to add items");
+      return;
+    }
+
     try {
       await api.post("/items", { ...newItem, price: Number(newItem.price) });
       setNewItem({ name: "", category: "", price: "", description: "" });
@@ -65,6 +79,12 @@ function Items() {
 
   // ✅ Delete item
   const handleDelete = async (id) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Please log in to delete items");
+      return;
+    }
+
     try {
       await api.delete(`/items/${id}`);
       fetchItems();
@@ -75,6 +95,12 @@ function Items() {
 
   // ✅ Update item
   const handleUpdate = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Please log in to update items");
+      return;
+    }
+
     try {
       await api.put(`/items/${editingItem._id}`, {
         ...editingItem,
@@ -88,6 +114,10 @@ function Items() {
   };
 
   const handleEdit = (item) => setEditingItem(item);
+
+  // ✅ Render
+  if (loading) return <p className="p-6 text-gray-600">Loading items...</p>;
+  if (error) return <p className="p-6 text-red-500">{error}</p>;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50 p-6">
