@@ -1,7 +1,10 @@
 import { useCart } from "../context/CartContext";
 
 function Cart() {
-  const { cart, removeFromCart } = useCart();
+  const { cart, removeFromCart, loading, error } = useCart();
+
+  if (loading) return <p className="p-6 text-gray-600">Loading cart...</p>;
+  if (error) return <p className="p-6 text-red-500">{error}</p>;
 
   return (
     <div className="p-6 min-h-screen bg-gray-50">

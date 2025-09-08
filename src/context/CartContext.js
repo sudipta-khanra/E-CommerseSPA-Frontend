@@ -8,23 +8,21 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch cart items
   const fetchCart = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Please log in to view products");
+      setCart([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      setError(null);
-
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("No token found. Please login.");
-        setCart([]);
-        setLoading(false);
-        return;
-      }
-
       const res = await api.get("/cart");
       const validItems = res.data.items?.filter(i => i?.item) || [];
       setCart(validItems);
+      setError(null);
     } catch (err) {
       console.error("Error fetching cart:", err.response?.data || err.message);
       setError(err.response?.data?.msg || "Failed to fetch cart");
@@ -34,24 +32,36 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Add item to cart
   const addToCart = async (itemId) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Please log in to add items");
+      return;
+    }
+
     try {
       const res = await api.post("/cart/add", { itemId });
       const validItems = res.data.items?.filter(i => i?.item) || [];
       setCart(validItems);
+      setError(null);
     } catch (err) {
       console.error("Error adding item:", err.response?.data || err.message);
       setError(err.response?.data?.msg || "Failed to add item");
     }
   };
 
-  // Remove item from cart
   const removeFromCart = async (itemId) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Please log in to remove items");
+      return;
+    }
+
     try {
       const res = await api.post("/cart/remove", { itemId });
       const validItems = res.data.items?.filter(i => i?.item) || [];
       setCart(validItems);
+      setError(null);
     } catch (err) {
       console.error("Error removing item:", err.response?.data || err.message);
       setError(err.response?.data?.msg || "Failed to remove item");
@@ -69,5 +79,4 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-// Custom hook
 export const useCart = () => useContext(CartContext);
